@@ -98,13 +98,30 @@ gulp.task('jshint', function () {
 gulp.task('html', ['stylesheet'], function () {
   var assets = $.useref.assets({searchPath: ['.tmp', 'app', '.']});
 
-  return gulp.src('app/*.html')
+  return gulp.src('app/*.<%= htmlTemplateExtension %>')
     .pipe(assets)
     .pipe($.if('*.js', $.uglify()))
     .pipe($.if('*.css', $.csso()))
     .pipe(assets.restore())
     .pipe($.useref())
-    .pipe($.if('*.html', $.minifyHtml({conditionals: true, loose: true})))
+
+<% if (htmlTemplateExtension == "hbs") { %>
+    .pipe($.if('*.hbs', $.compileHandlebars(templateData, {
+      // Configuration options: https://github.com/kaanon/gulp-compile-handlebars#options
+      ignorePartials: true,
+      batch : ['./app'],
+      partials: {},
+      helpers: {}
+    })))
+    .pipe($.if('*.hbs', $.compileHandlebars(templateData, options)))
+    .pipe($.if('*.hbs', $.rename('index.html')))
+
+<% } else if (htmlTemplateExtension == "twig") { %>
+    .pipe($.if('*.twig', $.twigCompile()))
+<% } %>
+
+    .pipe($.if('*.<%= htmlTemplateExtension %>', $.minifyHtml({conditionals: true, loose: true})))
+    .pipe(gulp.dest('.tmp'))
     .pipe(gulp.dest('dist'));
 });
 
@@ -131,7 +148,7 @@ gulp.task('fonts', function () {
 gulp.task('extras', function () {
   return gulp.src([
     'app/*.*',
-    '!app/*.html'
+    '!app/*.<%= htmlTemplateExtension %>'
   ], {
     dot: true
   }).pipe(gulp.dest('dist'));
@@ -153,12 +170,13 @@ gulp.task('serve', ['stylesheet', 'javascript', 'fonts'], function () {
 
   // watch for changes
   gulp.watch([
-    'app/*.html',
+    'app/*.<%= htmlTemplateExtension %>',
     'app/js/**/*.js',
     'app/images/**/*',
     '.tmp/fonts/**/*'
   ]).on('change', reload);
 
+  gulp.watch('app/css/**/*<%= cssExtension %>', ['stylesheet']);
   gulp.watch('app/css/**/*<%= cssExtension %>', ['stylesheet']);
   gulp.watch('app/js/**/*.js', ['javascript']);
   gulp.watch('app/fonts/**/*', ['fonts']);
@@ -185,7 +203,7 @@ gulp.task('wiredep', function () {
     }))
     .pipe(gulp.dest('app/css'));
 <% } %>
-  gulp.src('app/*.html')
+  gulp.src('app/*.<%= htmlTemplateExtension %>')
     .pipe(wiredep({
       // exclude: ['bootstrap-sass-official'],
       ignorePath: /^(\.\.\/)*\.\./

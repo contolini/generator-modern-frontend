@@ -28,6 +28,13 @@
     "gulp.spritesmith": "~3.3.1",
 <% } %>
 
+<% if (htmlTemplateExtension == "hbs") { %>
+    "gulp-compile-handlebars": "^0.4.4",
+    "gulp-rename": "^1.2.2",
+<% } else if (htmlTemplateExtension == "twig") {%>
+    "gulp-twig-compile": "^0.1.0",
+<% } %>
+
     "gulp-cache": "^0.2.8",
     "gulp-csso": "^1.0.0",
     "gulp-if": "^1.2.5",

@@ -41,10 +41,32 @@ module.exports = yeoman.generators.Base.extend({
         name: 'None (plain css)',
         value: 'none'
       }]
+    }, {
+      type: 'list',
+      name: 'htmlTemplateExtension',
+      message: 'Which HTML template engine would you like to use?',
+      choices: [{
+        name: 'None (plain html)',
+        value: 'html',
+        checked: true
+      }, {
+        name: 'Handlebars',
+        value: 'hbs'
+      }, {
+        name: 'Twig',
+        value: 'twig'
+      }
+      // , {
+      //    name: '',
+      //    value: 'none'
+      //  }
+      ]
+
     }];
 
     this.prompt(prompts, function (props) {
       this.cssPreprocessor = props.cssPreprocessor;
+      this.htmlTemplateExtension = props.htmlTemplateExtension;
 
       var cssExtensions = {
         "none": ".css",
@@ -56,6 +78,7 @@ module.exports = yeoman.generators.Base.extend({
 
       done();
     }.bind(this));
+
   },
 
   writing: {
